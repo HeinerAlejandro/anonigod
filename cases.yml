@@ -1,0 +1,15 @@
+devices:
+  path: "cases.compliancer"
+  class: CompliancerCase
+  connections: "cases/compliancer/connections.json"
+  rules:
+    devices: #database
+      devices: #table  
+        ip: ipv4_private_random #field
+        # iptransport: ipv4_private_random
+        # name: devices_name_fake
+        # host: inheritance:self.name
+        serial_number: str_random
+      device_sedona: #table
+        guid: "template:IN/{fixed->([a-zA-Z]|-)+}/ROUTER-{inheritance->devices.devices.host}"
+        #serial_number: inheritance:devices.devices.serial_number
