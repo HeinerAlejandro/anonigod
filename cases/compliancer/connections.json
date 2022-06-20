@@ -1,0 +1,12 @@
+{
+    "devices": {
+        "dbtype": "mysql",
+        "conn": {
+            "host": "172.18.48.1",
+            "port": 3306,
+            "user": "root",
+            "password": "1234",
+            "db": "devices"
+        }
+    }
+}
