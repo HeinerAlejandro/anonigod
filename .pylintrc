@@ -1,0 +1,17 @@
+[MESSAGES CONTROL]
+disable=locally-disabled,invalid-sequence-index,invalid-name,missing-docstring
+
+[REPORTS]
+# Simplify pylint reports
+reports=yes
+
+[SIMILARITIES]
+min-similarity-lines=10
+ignore-docstrings=yes
+
+[pre-commit-hook]
+command=custom_pylint
+limit=7.0
+
+[FORMAT]
+max-line-length=180
