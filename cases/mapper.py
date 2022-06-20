@@ -7,7 +7,7 @@ import shelve
 from abc import ABC, abstractmethod
 from typing import Any, List
 
-from anonimization_script.exceptions import MapNotFound
+from anonimization_script.anonimization_script.exceptions import MapNotFound
 
 class Mapper(ABC):
     """Mapper abstract class"""
@@ -57,8 +57,9 @@ class SimpleMapper(Mapper):
         self._store[route] = maps
 
     def get_value_for(self, value, route):
+        
         try:
-            self._store[route][value]
+            return self._store[route][value]
         except KeyError:
             raise MapNotFound(f"Value '{value}' for route: {route} doesn't have mapped values")
     
