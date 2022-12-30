@@ -51,7 +51,7 @@ def import_class(path: str, class_name: str):
     return importlib.import_module(path).__getattribute__(class_name)
 
 
-def tranform_to_rules(factory: RuleFactory, rules):
+def tranform_to_rules(factory: RuleFactoryAbstract, rules):
     """Get Rule objecs from rule names"""
     return { key: factory.get_rule(rule) for key, rule in rules.items() }
 
