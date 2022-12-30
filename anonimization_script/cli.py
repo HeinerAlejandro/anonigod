@@ -22,7 +22,7 @@ def start(cases: str) -> None:
     if cases == None:
         raise NoConnectionFileProvided("<cases>.yml must be provided")
     
-    app = App(cases_file=cases)
+    app = App(cases_file_dir=cases)
     app.start()
     
 if __name__ == '__main__':
