@@ -3,12 +3,28 @@
 import importlib
 
 from asyncio import gather, iscoroutine, AbstractEventLoop
+import json
 from typing import Any, Callable, List, Optional
 
 from asgiref.sync import sync_to_async
 
-from cases.db import DBAdapter
-from cases.rules import RuleFactory
+from anonimization_script.cases.db import DBAdapter
+from anonimization_script.cases.rules.abstracts import RuleFactoryAbstract
+
+from faker import Faker
+
+
+ex = Faker()
+
+
+def get_connections(config: dict) -> dict:
+    """Get Database connections"""
+    connections = json.load(config["connections"])
+    return connections
+
+
+def get_unique_name():
+    return ex.unique.bothify(letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789', text="?????????????")
 
 
 def load_case(name: str):
