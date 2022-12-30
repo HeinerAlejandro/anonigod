@@ -5,47 +5,78 @@ __version__ = "0.0.1"
 
 import json
 from abc import ABC, abstractmethod
+from zlib import DEF_BUF_SIZE
 
-from anonimization_script.utils import DBFactory, get_plain_rules
-from anonimization_script.exceptions import BDTypeNotValid
-from cases.db import DBAdapter
+from anonimization_script.exceptions import DBTypeNotValid
+from anonimization_script.cases.db import DBAdapter, DBFactory
+
 
 class Meta(ABC):
     """Abstract meta class"""
     @classmethod
     @abstractmethod
-    def from_case_config(cls, config: dict):
+    def from_case_config(cls, case: str, connections: str, config: dict):
+        pass
+    
+    @staticmethod
+    @abstractmethod
+    def __get_connections():
+        pass
+    
+    @abstractmethod
+    def get_db(self) -> DBAdapter:
+        pass
+    
+    @abstractmethod
+    def get_steps(self) -> list:
+        pass
+    
+    @abstractmethod
+    def get_case(self) -> str:
+        pass
+    
+    @abstractmethod
+    def get_config(self) -> dict:
         pass
     
 class MetaCase(Meta):
     """Meta class for Case"""
-    def __init__(self, case:str, dbs: dict[str, DBAdapter], rules: dict):
-        self.case = case
-        self._dbs = dbs
-        self._rules = rules
+    def __init__(self, case: str, db: DBAdapter, steps: list, config: dict):
+        self._case = case
+        self._db = db
+        self._steps = steps
+        self._config = config
 
     @staticmethod
-    def __get_connections(connections: str):
+    def __get_connections(connections: str, database_connections: dict) -> DBAdapter:
         """get connections from connection file
 
         Args:
-            connections (str): _description_
-
+            connections (str): connections available
+            conn_name (str): DB connection name for cases
         Returns:
-            _type_: _description_
+            DBAdapter: db object
         """
         with open(connections) as conn_file:
             connections_data = json.load(conn_file)
             
-            conns = {
-                item[0]: DBFactory.get_db(item[1]['dbtype'])(item[1]['conn'], item[1]['dbtype'])
-                for item in connections_data.items()
-            }
+            db_item = connections_data.get(database_connections['connect_to'], None)
             
-        return conns
+            if not db_item:
+                raise DBTypeNotValid(f"Database connection with name: {database_connections['connect_to']} not found in connections file")
+                
+            db = DBFactory.get_db(
+               db_item['dbtype']
+            )(
+                db_item['conn'], 
+                db_item['dbtype'],
+                database_connections["bulk_in"]
+            )
+            
+        return db
 
     @classmethod
-    def from_case_config(cls, case: str, config: dict) -> Meta:
+    def from_case_config(cls, case: str, connections: str, config: dict) -> Meta:
         """builder function for Meta object from step config
 
         Args:
@@ -55,33 +86,34 @@ class MetaCase(Meta):
             Meta: Meta object
         """
        
-        dbs = cls.__get_connections(config['connections'])
+        db = cls.__get_connections(connections['connections_file'], {
+                "connect_to": config["connection_name"],
+                "bulk_in": config["bulk_in"]
+            }
+        )
         
-        rules = config['rules']
+        steps = config['steps']
     
-        return cls(case=case, dbs=dbs, rules=rules)
+        return cls(case=case, db=db, steps=steps, config=config)
 
-    def get_db_for(self, dbname: str) -> DBAdapter:
+    def get_db(self) -> DBAdapter:
         """Get db for its name
-
-        Args:
-            dbname (str): connection name
-
-        Raises:
-            BDTypeNotValid: _description_
 
         Returns:
             DBAdapter: Database Adapter for connection
         """
-        try:
-            return self._dbs[dbname]
-        except KeyError:
-            raise BDTypeNotValid("DB Type must be within the registered database")
+        return self._db
 
-    def get_rules(self):
+    def get_steps(self) -> list:
         """Get rules
 
         Returns:
-            _type_: _description_
+            list: Steps of case
         """
-        return self._rules
+        return self._steps
+    
+    def get_case(self) -> str:
+        return self._case
+    
+    def get_config(self) -> dict:
+        return self._config
