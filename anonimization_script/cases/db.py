@@ -6,7 +6,7 @@ import pymysql.cursors
 from sqlalchemy import create_engine, Table, MetaData, inspect, select, insert
 from pymongo import MongoClient
 
-from anonimization_script.exceptions import BDTypeNotValid
+from anonimization_script.exceptions import DBTypeNotValid
 
 
 class DBAdapter(ABC):
@@ -91,10 +91,12 @@ def get_data_format(data: Any):
     else:
         return data
 
+
 class MYSQLAdapter(DBRelationalAdapter):
     """MySQLAdapter"""
-    def __init__(self, conn: dict, db_type: str):
+    def __init__(self, conn: dict, db_type: str, bulk_in: str):
         self.dbtype = db_type
+        self.bulk_in = bulk_in
         self.db_pymsql = pymysql.connect(**conn, autocommit=True)
         connection_url = f"mysql+pymysql://{conn['user']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
         self.db_sqlalchemy = create_engine(connection_url)
@@ -102,10 +104,10 @@ class MYSQLAdapter(DBRelationalAdapter):
         self.db_sqlalchemy._metadata.reflect(self.db_sqlalchemy)
 
         with self.db_pymsql.cursor() as cursor:
-            cursor.execute(f"DROP DATABASE IF EXISTS {conn['db']}_fake")
-            cursor.execute(f"CREATE DATABASE {conn['db']}_fake")
+            cursor.execute(f"DROP DATABASE IF EXISTS {self.bulk_in}")
+            cursor.execute(f"CREATE DATABASE {self.bulk_in}")
 
-        connection_url_fake = f"mysql+pymysql://{conn['user']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}_fake"
+        connection_url_fake = f"mysql+pymysql://{conn['user']}:{conn['password']}@{conn['host']}:{conn['port']}/{self.bulk_in}"
         self.db_fake_sqlalchemy = create_engine(connection_url_fake)
         self.db_fake_sqlalchemy._metadata = MetaData(bind=self.db_fake_sqlalchemy)
         self.db_fake_sqlalchemy._metadata.reflect(self.db_fake_sqlalchemy)
@@ -173,57 +175,15 @@ class MYSQLAdapter(DBRelationalAdapter):
 
     def update_target(self, dataframe: pd.DataFrame, target: str, index_column: Optional[str]="id"):
         dataframe.to_sql(target, self.db_fake_sqlalchemy, index=False, if_exists="append")
-
-        """
-        command = "UPDATE {} SET {} WHERE {} IN ({});"
-        case_format = "(CASE {} END)"
-        when_format = "WHEN {} THEN {}"
-        whens = {}
-        ids = [str(record[index_column]) for record in records]
-        ids_for_where = ",".join(ids)
-        
-        cases = {}
-        
-        columns = records[0].keys()
-        
-        for column in columns:
-            if column != index_column:
-                whens[column]={}  
-            for record in records:
-                if column != index_column:
-                    whens[column][record[index_column]] = record[column]
-        
-        cond = []
-        for column in columns:
-            if column != index_column:
-                for _id in whens[column].keys():
-                    replace_value = whens[column][_id]
-                    when_value = when_format.format(f"{index_column}={str(_id)}", get_data_format(replace_value))
-                    cond.append(when_value)
-
-                cases[column] = " ".join(cond)
-                cond = []
-        
-        global_cases = [f"{column}={case_format.format(when)}" for column, when in cases.items()]
-        cases_string = ",".join(global_cases)
-
-        command = command.format(target, cases_string, index_column, ids_for_where)
-
-        with self.db_sqlalchemy.connect() as con:
-            try:
-                con.execute(command)
-            except Exception as e:
-                raise Exception(str(e.__dict__['orig']))
-        """
             
             
 class MONGODBAdapter(DBAdapter):
     """MONGODBAdapter"""
 
-    def __init__(self, conn: dict, db_type: str):
+    def __init__(self, conn: dict, db_type: str, bulk_in: str):
         self.dbtype = db_type
         self.db = conn.pop("db")
-        self.db_fake = f"{self.db}_fake"
+        self.bulk_in = bulk_in
 
         self.db_pymongo = MongoClient(**conn)
 
@@ -234,8 +194,8 @@ class MONGODBAdapter(DBAdapter):
         return pd.DataFrame(list(self.db_pymongo[self.db][target].find()))
 
     def update_target(self, dataframe, target, index_column: Optional[str] = "id"):
-        self.db_pymongo[self.db_fake][target].delete_many({})
-        self.db_pymongo[self.db_fake][target].insert_many(dataframe.to_dict(orient="records"))
+        self.db_pymongo[self.bulk_in][target].delete_many({})
+        self.db_pymongo[self.bulk_in][target].insert_many(dataframe.to_dict(orient="records"))
         
 class DBFactory:
 
@@ -252,7 +212,7 @@ class DBFactory:
             dbtype (str): dbtype
 
         Raises:
-            BDTypeNotValid: DBType is not defined
+            DBTypeNotValidTypeNotValid: DBType is not defined
 
         Returns:
             DBAdapter: DB Adapter
@@ -260,4 +220,4 @@ class DBFactory:
         try:
             return cls.DB_ADAPTERS[dbtype]
         except KeyError:
-            raise BDTypeNotValid(f"DB type '{dbtype}'is not a valid type, please use this instead {','.join(cls.DB_ADAPTERS.keys())}")
+            raise DBTypeNotValid(f"DB type '{dbtype}'is not a valid type, please use this instead {','.join(cls.DB_ADAPTERS.keys())}")
