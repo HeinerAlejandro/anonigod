@@ -1,3 +1,23 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta:__legacy__"
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "anonimization_script", "test"
+]
+
+[project]
+name = "anonigod"
+version = "0.0.1"
+author = [
+  { name="Heiner Enis", email="heiner.enis@gmail.com" }
+]
+maintainers = [
+  { name="Heiner Enis", email="heiner.enis@gmail.com" }
+]
+readme = "Anonigod is a simple anonimyzer to transform data from multiples databases and related the changes of dependent columns among them"
+requires-python = ">=3.7"
+classifiers=[
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
