@@ -1,0 +1,48 @@
+connections:
+  connections_file: "connections.example.json"
+cases:
+  devices: # Case name
+    connection_name: "devices"
+    database_target: devices # Database target name
+    bulk_in: devices_fake # Database Result
+    mapper_type: simple
+    mapper_database_target: redis
+    steps:
+      - description: "Region name anonimization"
+        source_target: regions # Table or Collection target name
+        mapper_type: redis
+        mapper_database_target: redis
+        rules:
+          name: region_random # Column or Field name
+      - description: "Site name anonimization"
+        source_target: sites # Table or Collection target name
+        mapper_type: redis
+        mapper_database_target: redis
+        rules:
+          name: city_random
+      - description: "Devices anonimization"
+        source_target: devices # Table or Collection target name
+        mapper_type: redis
+        mapper_database_target: redis
+        rules:
+          ip: ipv4_private_random
+          iptransport: ipv4_private_random
+          name: devices_name_fake
+          host: inheritance:self.name
+          serial_number: str_random
+          guid: template:IN/[0-9a-zA-Z-]+/(?:ROUTER-)?{inheritance->([0-9a-zA-Z-_]+)->devices.devices.devices.step_1.host}
+  conf_retriever: # Case name
+    connection_name: "conf_retriever"                                   
+    database_target: conf_retriever # Database target name
+    bulk_in: devices_fake
+    mapper_type: simple
+    mapper_database_target: redis
+    steps:
+      - description: "Conf Retriever anonimization"
+        source_target: conf_retriever # Table or Collection target name
+        mapper_type: simple
+        mapper_database_target: redis
+        rules:
+          device: inheritance:devices.devices.devices.step_3.name
+          ip: inheritance:devices.devices.devices.step_3.ip
+          name: region_random                                                        

@@ -1,0 +1,28 @@
+{
+    "devices": {
+        "dbtype": "mysql",
+        "conn": {
+            "host": "172.17.64.1",
+            "port": 3306,
+            "user": "root",
+            "password": "1234",
+            "db": "devices"
+        }
+    },
+    "conf_retriever": {
+        "dbtype": "mongodb",
+        "conn": {
+            "host": "172.24.224.1",
+            "port": 27017,
+            "db": "conf_retriever"
+        }
+    },
+    "redis_mapper": {
+        "dbtype": "redis",
+        "conn": {
+            "host": "127.0.0.1",
+            "port": 6379,
+            "db": 0
+        }
+    }
+}

@@ -15,6 +15,13 @@ pony = "*"
 pymysql = "*"
 faker = "*"
 pandas = "*"
+sqlalchemy = "*"
+asgiref = "*"
+pymongo = "*"
+regex = "*"
+progressbar2 = "*"
+redis = "*"
+sphinx-rtd-theme = "*"
 
 [dev-packages]
 pipenv-setup = "==3.2.0"

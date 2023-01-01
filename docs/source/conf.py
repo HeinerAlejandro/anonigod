@@ -18,7 +18,6 @@ sys.path.insert(0, os.path.abspath('../anonimization_script'))
 # -- Project information -----------------------------------------------------
 
 project = 'Anonimization Script'
-copyright = '2022, EmQu Technologies, Inc'
 author = 'Heiner Enis'
 
 

@@ -8,7 +8,7 @@ Modified by Madoshakalaka@Github (dependency links added)
 
 # Always prefer setuptools over distutils
 from os import path
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 
 # io.open is needed for projects that support Python 2.7
@@ -120,7 +120,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=find_namespace_packages(),  # Required
+    packages=find_packages(),  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. If you

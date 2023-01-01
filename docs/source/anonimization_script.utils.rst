@@ -1,4 +1,4 @@
-extractor\_script.general\_command module
+anonimization\_script.general\_command module
 =========================================
 
 .. automodule:: anonimization_script.utils
