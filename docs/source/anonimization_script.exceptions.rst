@@ -1,7 +1,7 @@
 extractor\_script.exceptions module
 ===================================
 
-.. automodule:: extractor_script.exceptions
+.. automodule:: anonimization_script.exceptions
    :members:
    :undoc-members:
    :show-inheritance:

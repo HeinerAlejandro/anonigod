@@ -1,4 +1,4 @@
-extractor\_script package
+anonimization\_script package
 =========================
 
 Submodules
@@ -6,15 +6,20 @@ Submodules
 
 .. toctree::
    :maxdepth: 4
-
+   anonimization_script.cases
+   anonimization_script.cases.db
+   anonimization_script.cases.mapper
+   anonimization_script.cases.meta
+   anonimization_script.cases.rules
    anonimization_script.cli
+   anonimization_script.app
    anonimization_script.exceptions
    anonimization_script.utils
 
 Module contents
 ---------------
 
-.. automodule:: extractor_script
+.. automodule:: anonimization_script
    :members:
    :undoc-members:
    :show-inheritance:
