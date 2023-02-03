@@ -11,7 +11,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pipenv'
-          cache-dependency-path: '**/Pipfile.lock'
+          cache-dependency-path: 'Pipfile.lock'
 
       - name: Install Pipenv
         run: |
